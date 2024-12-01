@@ -76,28 +76,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Install Trivy and cache database
-      - name: Install Trivy and cache database
-        run: |
-          VERSION="0.26.0"  # Version de Trivy
-          sudo apt-get install jq -y
-          TRIVY_URL="https://github.com/aquasecurity/trivy/releases/download/${VERSION}/trivy_${VERSION}_Linux-x86_64.tar.gz"
-          curl -sfL "$TRIVY_URL" -o trivy.tar.gz
-          tar zxvf trivy.tar.gz
-          sudo mv trivy /usr/local/bin/
-          TRIVY_DB_DIR="$HOME/.cache/trivy"
-
-      - name: Cache Trivy database
-        uses: actions/cache@v2
+      # Run Trivy vulnerability scanner
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
         with:
-          path: $TRIVY_DB_DIR
-          key: ${{ runner.os }}-trivy-db-${{ hashFiles('**/Dockerfile', '**/app.py') }}
-          restore-keys: |
-            ${{ runner.os }}-trivy-db-
-
-      # Scan Docker image for vulnerabilities
-      - name: Scan Docker image for vulnerabilities
-        run: trivy image --no-progress --exit-code 1 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          image-ref: '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
 
       # Sign the published Docker image
       - name: Sign the published Docker image
