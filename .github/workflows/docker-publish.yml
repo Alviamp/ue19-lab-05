@@ -81,10 +81,24 @@ jobs:
       # Install Trivy for vulnerability scanning
       - name: Install Trivy
         run: |
-          VERSION="0.26.0"  
-          curl -sSL "https://github.com/aquasecurity/trivy/releases/download/v${VERSION}/trivy_${VERSION}_Linux-x86_64.tar.gz" -o trivy.tar.gz
+          VERSION="0.26.0"  # Vous pouvez changer cette version si nécessaire
+          TRIVY_URL="https://github.com/aquasecurity/trivy/releases/download/v${VERSION}/trivy_${VERSION}_Linux-x86_64.tar.gz"
+          
+          # Vérifier si l'URL est accessible avant de télécharger
+          curl -I -s "$TRIVY_URL" | grep "200 OK" || { echo "Erreur lors de l'accès à l'URL"; exit 1; }
+          
+          # Télécharger Trivy
+          curl -sfL "$TRIVY_URL" -o trivy.tar.gz
+          
+          # Vérifier que le fichier est bien un fichier tar.gz
+          file trivy.tar.gz
+          
+          # Extraire le fichier tar.gz
           tar zxvf trivy.tar.gz
+          
+          # Déplacer Trivy dans /usr/local/bin
           sudo mv trivy /usr/local/bin/
+
 
 
       # Scan the Docker image for vulnerabilities
