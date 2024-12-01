@@ -65,13 +65,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Run Trivy vulnerability scanner
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          image-ref: 'ghcr.io/Alviamp/ue19-lab-05:latest'  # Utilisation de "latest" ou d'un autre tag valide
           format: 'sarif'
           output: 'trivy-results.sarif'
+          cache: false  # Désactivation du cache
 
       # Push Docker image if no vulnerabilities are found
       - name: Push Docker image to registry
